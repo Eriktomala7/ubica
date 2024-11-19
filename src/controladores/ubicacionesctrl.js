@@ -24,17 +24,25 @@ export const getUbicacionById = async (req, res) => {
     }
 };
 
-// Controlador para crear una nueva ubicación
+// Controlador para crear una nueva ubicación con validación
 export const createUbicacion = async (req, res) => {
     const { titulo, latitud, longitud, medida } = req.body;
+    if (!titulo || !latitud || !longitud || !medida) {
+        return res.status(400).json({ success: false, message: 'Todos los campos son obligatorios' });
+    }
+
     try {
         const [result] = await conmysql.query(
             'INSERT INTO ubicaciones (titulo, latitud, longitud, medida) VALUES (?, ?, ?, ?)',
             [titulo, latitud, longitud, medida]
         );
-        res.status(201).json({ id: result.insertId, titulo, latitud, longitud, medida });
+        res.status(201).json({ 
+            success: true,
+            data: { id: result.insertId, titulo, latitud, longitud, medida },
+            message: 'Ubicación creada con éxito' 
+        });
     } catch (error) {
-        res.status(500).json({ message: 'Error al crear la ubicación' });
+        res.status(500).json({ success: false, error: error.message });
     }
 };
 
